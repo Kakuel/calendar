@@ -1,13 +1,351 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* 글로벌 색상 변수 (Light Theme) */
+:root {
+  --bg-color: #fbf9fa;
+  --panel-bg: #ffffff;
+  --text-main: #5c5c5c;
+  --text-light: #aaa;
+  --border-color: #f1e4e8;
+  --primary-btn: #b5ead7;
+  --danger-btn: #ffb7b2;
+  --hover-btn: #e2f0cb;
+  --saturday: #7da5e0;
+  --sunday: #e67575;
+
+  --tag-공부: #ffd1dc;
+  --tag-운동: #c8e7ff;
+  --tag-약속: #fff0b3;
+  --tag-업무: #eaddff;
+  --tag-기본: #e0e0e0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* 다크 모드 색상 덮어쓰기 (Dark Theme) */
+.dark-mode {
+  --bg-color: #121212;      /* 전체 배경 (검은색에 가까운 회색) */
+  --panel-bg: #1e1e1e;      /* 요소 배경 (조금 더 밝은 회색) */
+  --text-main: #ffffff;     /* 메인 글씨 흰색 */
+  --text-light: #bbbbbb;    /* 보조 글씨 밝은 회색 */
+  --border-color: #333333;  /* 경계선 어둡게 */
+  --primary-btn: #2d5a4a;
+  --danger-btn: #8a3a35;
+  --hover-btn: #3d7a64;
+  --saturday: #5c85d6;
+  --sunday: #d65c5c;
+
+  --tag-공부: #7a515a;
+  --tag-운동: #486178;
+  --tag-약속: #7a704a;
+  --tag-업무: #584a6b;
+  --tag-기본: #555555;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  /* 변수를 사용하여 배경색과 글자색이 테마에 따라 자동 변경되게 함 */
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
+html, body, #root {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body { margin: 0; font-family: 'Pretendard', sans-serif; }
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  transition: background-color 0.3s ease;
+}
+
+/* 헤더 및 푸터 */
+.global-header {
+  background: var(--panel-bg); /* 다크모드 시 #1e1e1e */
+  color: var(--text-main);
+  padding: 15px 30px;
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.logo { font-size: 1.5rem; font-weight: bold; color: var(--text-main); }
+.header-nav { display: flex; align-items: center; gap: 20px; }
+.nav-btn { cursor: pointer; font-weight: bold; padding: 6px 12px; background: var(--border-color); color: var(--text-main); border-radius: 6px; transition: 0.2s; }
+.nav-btn:hover { background: var(--primary-btn); color: #fff; }
+.app-main {
+  flex: 1; /* 푸터를 바닥으로 밀어내기 위함 */
+  padding: 20px 0;
+}
+
+.global-footer {
+  background: var(--panel-bg);
+  color: var(--text-light);
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto; /* 항상 하단 유지 */
+  transition: background 0.3s ease, color 0.3s ease;
+}
+/* 테마 스위치 */
+.theme-switch { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.theme-label { font-size: 0.9rem; font-weight: 500; }
+.theme-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: relative; width: 44px; height: 24px; background-color: #ccc; border-radius: 24px; transition: 0.4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.4s; }
+input:checked + .slider { background-color: #6c5ce7; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* 레이아웃 */
+.workspace { display: flex; gap: 20px; align-items: flex-start; }
+.calendar-container { flex: 3; background: var(--panel-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); overflow: hidden; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+/* 버튼 디자인 */
+button { background: var(--primary-btn); color: var(--text-main); padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+button:hover { background-color: var(--hover-btn); }
+.calendar-header button { padding: 8px 15px; }
+.delete-btn { background: var(--danger-btn); }
+.cancel-btn { background: #ccc; }
+
+/* 그리드 스타일 */
+.calendar-grid-wrapper { transition: transform 0.3s ease, opacity 0.3s ease; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border-color); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+.header-row div { background: var(--panel-bg); text-align: center; padding: 10px 0; font-weight: bold; border-bottom: 1px solid var(--border-color); }
+.calendar-cell { background: var(--panel-bg); min-height: 110px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; transition: 0.2s; }
+.calendar-cell:hover { background: var(--border-color); }
+.calendar-cell.not-current { opacity: 0.4; }
+.today-cell { background: rgba(181, 234, 215, 0.2); border: 1px dashed var(--primary-btn); }
+.day-number { font-size: 0.9rem; margin-bottom: 5px; font-weight: 500; }
+.sunday { color: var(--sunday); }
+.saturday { color: var(--saturday); }
+
+/* 이벤트 리스트 */
+.event-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 80px; }
+.event-list::-webkit-scrollbar { width: 4px; }
+.event-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.event-item { font-size: 0.75rem; padding: 4px; border-radius: 4px; cursor: grab; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; }
+
+/* 우측 사이드바 */
+.calendar-sidebar { flex: 1; background: var(--panel-bg); border-radius: 16px; padding: 20px; min-width: 250px; }
+.sidebar-section h3 { font-size: 1.1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+.search-input { width: 100%; padding: 10px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; }
+.tag-list { display: flex; flex-direction: column; gap: 10px; }
+.tag-row { display: flex; justify-content: space-between; align-items: center; }
+.tag-label { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #333; }
+
+/* --- 모달 애니메이션 및 구조 --- */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.25); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); animation: fadeIn 0.25s ease-out; z-index: 1000; }
+.modal-content { background: var(--panel-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border-color); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* --- 폼(Form) 세부 디자인 --- */
+.event-form { display: flex; flex-direction: column; gap: 12px; }
+.event-form label { display: flex; flex-direction: column; font-size: 0.9rem; font-weight: 600; gap: 5px; color: var(--text-main); }
+.event-form input, .event-form select, .event-form textarea { background: var(--bg-color); color: var(--text-main); width: 100%; box-sizing: border-box; border-radius: 10px; padding: 10px 14px; border: 1px solid var(--border-color); transition: all 0.2s ease; }
+.event-form input:focus, .event-form select:focus, .event-form textarea:focus { border-color: var(--primary-btn); box-shadow: 0 0 0 3px rgba(181, 234, 215, 0.4); outline: none; }
+textarea { resize: none; font-family: inherit; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+
+/* --- 시간(드롭다운) 및 레이아웃 관련 CSS --- */
+.form-row { display: flex; gap: 15px; width: 100%; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.flex-1 { flex: 1; }
+.time-picker-group { display: flex; gap: 5px; }
+.time-picker-group select { padding: 8px 4px; text-align: center; }
+
+/* --- 설정 항목 그룹화(연한 민트 박스) --- */
+.settings-box { background: rgba(181, 234, 215, 0.15); border: 1px solid var(--primary-btn); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+
+/* --- 컬러 팔레트 --- */
+.color-palette { display: flex; gap: 12px; padding: 5px 0; }
+.color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 2px solid transparent; }
+.color-dot:hover { transform: scale(1.1); }
+.color-dot.active { transform: scale(1.15); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+/* --- 삭제 모드 전용 UI --- */
+.delete-confirm-container h3 { color: var(--danger-btn); margin-top: 0; }
+.delete-options { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; background: var(--bg-color); padding: 15px; border-radius: 8px; }
+.delete-options label { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; cursor: pointer; }
+.delete-description {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 15px;
+}
+
+.delete-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delete-option {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--panel-bg);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.delete-option span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+/* hover 효과 */
+.delete-option:hover {
+  background: var(--hover-btn);
+}
+
+/* 선택된 상태 */
+.delete-option.active {
+  border: 2px solid var(--primary-btn);
+  background: rgba(181, 234, 215, 0.2);
+}
+
+/* 위험 옵션 (전체 삭제) */
+.delete-option.danger {
+  border-color: var(--danger-btn);
+}
+
+.delete-option.danger.active {
+  border: 2px solid var(--danger-btn);
+  background: rgba(255, 183, 178, 0.2);
+}
+/* --- 모바일 반응형 --- */
+.mobile-view { display: none; margin-top: 30px; border-top: 2px dashed var(--border-color); padding-top: 20px; }
+.mobile-event-card { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 6px solid; cursor: pointer; display: flex; gap: 15px; align-items: center; }
+.mobile-event-date { font-weight: bold; color: var(--text-light); }
+.mobile-event-info strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+.mobile-event-info span { font-size: 0.85rem; color: var(--text-light); }
+
+@media (max-width: 768px) {
+  .workspace { flex-direction: column; }
+  .calendar-sidebar { width: 100%; position: static; order: -1; box-sizing: border-box; }
+  .calendar-container { width: 100%; box-sizing: border-box; }
+  .calendar-cell { min-height: 60px; }
+  .event-list { display: none; }
+  .mobile-view { display: block; }
+  .global-header { flex-direction: column; gap: 15px; }
+}
+
+.slide-next {
+  animation: slideLeft 0.3s ease;
+}
+
+.slide-prev {
+  animation: slideRight 0.3s ease;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.global-header,
+.global-footer {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+.header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 40px;   /* ← 좌우 여백 증가 */
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.event-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 전체 정렬을 왼쪽으로 강제 */
+.dday-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+/* label 영역을 최소화 */
+.dday-inline {
+  align-items: center;
+  gap: 6px;
+  display: inline-flex !important;
+  flex-direction: row !important;
+
+  width: 100%;        /* 🔥 중요: 넓어지는 것 방지 */
+  cursor: default;    /* 전체 클릭 막기 */
+}
+
+/* 텍스트 클릭 시 체크 안 되게 */
+.dday-inline span {
+  pointer-events: none;
+  flex: 1;              /* 핵심: 텍스트가 공간 차지 */
+  white-space: nowrap;
+}
+
+/* 체크박스만 클릭 가능 */
+.dday-inline input {
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 50%;
+}
+
+.event-dots {
+  display: none; /* 원래 flex였던 것을 none으로 수정 */
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  background-color: var(--primary-btn);
+  border-radius: 50%;
+}
+
+.dot-more {
+  font-size: 0.6rem;
+  color: var(--text-light);
+}
+
+/* 모바일 뷰에서만 보이게 설정 */
+@media (max-width: 768px) {
+  .event-dots {
+    display: flex; /* 모바일 화면일 때 다시 flex로 변경되어 나타남 */
+  }
+
+  .event-list {
+    display: none;
+  }
 }
