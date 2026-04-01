@@ -1,36 +1,28 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useApp } from '../components/AppContext'; // Context 커스텀 훅 임포트
 
 /**
- * Header 컴포넌트: 로고, 오늘 이동 버튼, 다크 모드 스위치를 포함합니다.
+ * Header 컴포넌트: 전역 상태(Context)에서 필요한 기능만 직접 구독합니다.
  */
-const Header = ({ setCurrentDate, isDarkMode, toggleDarkMode }) => {
-
-    // [효과] 다크 모드 상태 변화에 따라 body 태그의 클래스를 직접 제어
-    // 이를 통해 .app-container 바깥의 브라우저 배경까지 모두 어둡게 처리합니다.
-    useEffect(() => {
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-    }, [isDarkMode]);
-
-    // 'Today' 클릭 시 현재 날짜로 설정
-    const handleGoToday = () => {
-        setCurrentDate(new Date());
-    };
+const Header = () => {
+    // 부모(App.js)가 넘겨주던 props 대신, Context에서 필요한 것만 골라 사용합니다.
+    const { isDarkMode, toggleDarkMode, goToday } = useApp();
 
     return (
         <header className="global-header">
             <div className="header-inner">
                 <div className="logo">📅 puki's Barbecue time 🍖</div>
                 <nav className="header-nav">
-                    <span className="nav-btn" onClick={handleGoToday}>Today</span>
+                    {/* Context에서 가져온 goToday 함수를 직접 실행 */}
+                    <span className="nav-btn" onClick={goToday}>Today</span>
 
-                    {/* 다크 모드 토글 스위치 */}
                     <label className="theme-switch">
                         <span className="theme-label">{isDarkMode ? '🌙 Dark' : '☀️ Light'}</span>
-                        <input type="checkbox" checked={isDarkMode} onChange={toggleDarkMode} />
+                        <input
+                            type="checkbox"
+                            checked={isDarkMode}
+                            onChange={toggleDarkMode}
+                        />
                         <span className="slider round"></span>
                     </label>
                 </nav>

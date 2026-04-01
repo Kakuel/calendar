@@ -1,24 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
+import { useApp } from './AppContext';
 
-const Calendar = ({ currentDate, setCurrentDate }) => {
-    const [events, setEvents] = useState([]);
+const Calendar = () => {
+    const { currentDate, setCurrentDate, events, setEvents } = useApp();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(null);
     const [editingEvent, setEditingEvent] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [animClass, setAnimClass] = useState("");
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // 기본 오늘 날짜 선택
+    const [touchStart, setTouchStart] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-    // 앱 실행 시 로컬 스토리지 데이터 불러오기
     useEffect(() => {
-        const savedEvents = JSON.parse(localStorage.getItem('calendar_events')) || [];
-        setEvents(savedEvents);
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // 데이터가 변경될 때마다 자동 저장
-    useEffect(() => {
-        localStorage.setItem('calendar_events', JSON.stringify(events));
-    }, [events]);
+    // --- [스와이프 로직] ---
+    const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
+    const handleTouchEnd = (e) => {
+        if (!touchStart) return;
+        const touchEnd = e.changedTouches[0].clientX;
+        if (touchStart - touchEnd > 70) { // 왼쪽으로 스와이프 (다음 달)
+            const next = new Date(currentDate);
+            next.setMonth(next.getMonth() + 1);
+            setCurrentDate(next);
+        }
+        if (touchStart - touchEnd < -70) { // 오른쪽으로 스와이프 (이전 달)
+            const prev = new Date(currentDate);
+            prev.setMonth(prev.setMonth() - 1);
+            setCurrentDate(prev);
+        }
+    };
+
+    // --- [날짜 클릭 시] ---
+    const handleDateClick = (dateStr) => {
+        setSelectedDate(dateStr); // 일정 생성 대신 날짜 선택만 수행
+    };
+
+    // 선택된 날짜의 일정만 필터링
+    const dailyEvents = events.filter(event =>
+        event.date === selectedDate &&
+        event.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     // --- [일정 저장 로직 (반복 및 그룹 ID 적용)] ---
     const handleSaveEvent = (newEvent) => {
@@ -153,38 +182,11 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
     // 이번 달 일정의 전체 수
     const totalTags = currentMonthEvents.length;
 
-    // --- Calendar.js 내부 useEffect (알림 로직) ---
-    useEffect(() => {
-        // 앱 실행 시 권한 확실히 요청
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
-
-        const interval = setInterval(() => {
-            const now = new Date();
-            events.forEach(event => {
-                if (!event.notifyBefore || event.notifyBefore === "none") return;
-
-                const eventDateTime = new Date(`${event.date}T${event.startTime}:00`);
-                const diffMinutes = Math.floor((eventDateTime - now) / 60000);
-
-                if (diffMinutes === parseInt(event.notifyBefore)) {
-                    // 브라우저 시스템 알림 발생
-                    if (Notification.permission === "granted") {
-                        new Notification(`⏰ [일정 알림] ${event.title}`, {
-                            body: `${event.startTime} 시작 예정입니다.\n메모: ${event.memo || '없음'}`,
-                            icon: '/favicon.ico' // 아이콘이 있다면 표시
-                        });
-                    }
-                }
-            });
-        }, 60000);
-        return () => clearInterval(interval);
-    }, [events]);
-
     return (
         <div className="workspace">
-            <div className="calendar-container">
+            <div className="calendar-container"
+                 onTouchStart={handleTouchStart}
+                 onTouchEnd={handleTouchEnd}>
                 <div className="calendar-header">
                     <button onClick={() => changeMonth(-1)}>◀ 이전 달</button>
                     <h2>{year}년 {month + 1}월</h2>
@@ -207,10 +209,17 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
                             return (
                                 <div
                                     key={dayObj.dateStr}
-                                    className={`calendar-cell ${!dayObj.isCurrentMonth ? 'not-current' : ''} ${isToday ? 'today-cell' : ''}`}
+                                    className={`calendar-cell 
+                                                ${!dayObj.isCurrentMonth ? 'not-current' : ''} 
+                                                ${isToday ? 'today-cell' : ''} 
+                                                ${selectedDate === dayObj.dateStr ? 'selected' : ''}
+                                        `}
                                     onClick={() => {
                                         setSelectedDate(dayObj.dateStr);
-                                        setIsModalOpen(true);
+
+                                        if (!isMobile) {
+                                            setIsModalOpen(true);  // PC만 모달 열림
+                                        }
                                     }}
                                     onDragOver={onDragOver}
                                     onDrop={(e) => onDrop(e, dayObj.dateStr)}
@@ -252,33 +261,79 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
                         })}
                     </div>
                 </div>
-
-                {/* --- [모바일 전용 하단 UI 복구] --- */}
-                <div className="mobile-view">
-                    <h3>📱 {month + 1}월의 전체 일정</h3>
-                    {currentMonthEvents.length === 0 ? (
-                        <p className="empty-text">일정이 없습니다.</p>
-                    ) : (
-                        currentMonthEvents.map(evt => (
-                            <div
-                                key={evt.id}
-                                className="mobile-event-card"
-                                /* 수정된 부분: borderLeftColor 로직 교체 */
-                                style={{ borderLeftColor: evt.color || `var(--tag-${evt.tag}, var(--tag-기본))` }}
-                                onClick={() => { setEditingEvent(evt); setIsModalOpen(true); }}
-                            >
-                                <div className="mobile-event-date">{evt.date.substring(5)}</div>
-                                <div className="mobile-event-info">
-                                    <div className="event-item-content">
-                                        <strong>{evt.title}</strong>
-                                        <span className="dday">{getDDay(evt.date)}</span>
-                                    </div>
-                                    <span>{evt.startTime} ~ {evt.endTime}</span>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                <div className="mobile-search mobile-only-section">
+                    <input
+                        type="text"
+                        placeholder="일정 검색..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="mobile-search-input"
+                    />
                 </div>
+                {/* --- [모바일 전용 하단 UI 복구] --- */}
+                <div className="mobile-event-section mobile-only-section">
+                    <div className="section-header">
+                        <h3>📅 {selectedDate} 일정</h3>
+                        {/* 2번 요구사항: 일정 생성 버튼 추가 */}
+                        <button className="add-event-fab" onClick={() => setIsModalOpen(true)}>+</button>
+                    </div>
+
+                    <div className="daily-event-list">
+                        {dailyEvents.length > 0 ? (
+                            dailyEvents.map(event => (
+                                <div key={event.id} className="event-item" onClick={() => {
+                                    setEditingEvent(event);
+                                    setIsModalOpen(true);
+                                }}>
+                                    <span className="event-tag" style={{backgroundColor: event.color}}></span>
+                                    <div className="event-info">
+                                        <div className="event-card" onClick={() => {
+                                            setEditingEvent(event);
+                                            setIsModalOpen(true);
+                                        }}>
+                                            <div className="event-card-top">
+                                                <span
+                                                    className="event-dot"
+                                                    style={{ backgroundColor: event.color }}
+                                                ></span>
+
+                                                <span className="event-date">
+                                                  {event.date.substring(5)}
+                                                </span>
+
+                                                {event.isDday && (
+                                                    <span className="dday">{getDDay(event.date)}</span>
+                                                )}
+                                            </div>
+
+                                            <div className="event-card-title">
+                                                {event.title}
+                                            </div>
+
+                                            <div className="event-card-time">
+                                                {event.startTime} ~ {event.endTime}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="empty-msg">일정이 없습니다. + 버튼을 눌러 추가하세요!</p>
+                        )}
+                    </div>
+                </div>
+
+                {isModalOpen && (
+                    <Modal
+                        isOpen={isModalOpen}
+                        onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+                        onSave={handleSaveEvent}
+                        onDelete={handleDeleteEvent}
+                        event={editingEvent}
+                        date={selectedDate} // 선택된 날짜를 기본값으로 전달
+                        events={events}
+                    />
+                )}
             </div>
 
             <aside className="calendar-sidebar">
@@ -307,18 +362,6 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
                     )}
                 </div>
             </aside>
-
-            {isModalOpen && (
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={closeModal}
-                    onSave={handleSaveEvent}
-                    onDelete={handleDeleteEvent}
-                    event={editingEvent}
-                    date={selectedDate}
-                    events={events}
-                />
-            )}
         </div>
     );
 };

@@ -349,3 +349,239 @@ textarea { resize: none; font-family: inherit; }
     display: none;
   }
 }
+
+/* 모바일 하단 일정 세션 스타일 */
+.mobile-event-section {
+  padding: 20px;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border-color);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* 2번 요구사항: 일정 생성 FAB (Floating Action Button) */
+.add-event-fab {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: var(--primary-btn);
+  border: none;
+  font-size: 24px;
+  color: var(--text-main);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.add-event-fab:active {
+  transform: scale(0.9);
+}
+
+.daily-event-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 선택된 날짜 강조 스타일 */
+.calendar-day.selected {
+  background-color: var(--primary-btn);
+  color: white;
+  border-radius: 50%;
+}
+
+/* 기본적으로 데스크탑에서는 하단 일정 섹션을 숨김 */
+.mobile-only-section {
+  display: none;
+}
+
+/* 화면 너비가 768px 이하인 모바일/태블릿 환경에서만 표시 */
+@media (max-width: 768px) {
+  .mobile-only-section {
+    display: block; /* 또는 flex */
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: var(--panel-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  /* 모바일에서는 기존 사이드바(전체 일정 목록)를 숨겨서 중복을 방지할 수 있습니다 */
+  .calendar-sidebar {
+    display: none;
+  }
+}
+
+.selected {
+  border: 2px solid var(--primary-btn);
+}
+
+/* 기본적으로 모바일 섹션은 숨김 */
+.mobile-only-section {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  /* 기존 사이드바(전체 일정)는 모바일에서 숨김 */
+  .calendar-sidebar {
+    display: none;
+  }
+
+  .mobile-only-section {
+    display: block;
+    background: var(--panel-bg);
+    border-top: 2px solid var(--border-color);
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+    margin-top: 10px;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .add-event-fab {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-btn);
+    border: none;
+    font-size: 24px;
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .mobile-event-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+
+  .event-tag-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .event-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .event-time {
+    font-size: 12px;
+    color: var(--text-light);
+  }
+
+  /* 선택된 날짜 강조 스타일 */
+  .calendar-day.selected {
+    background-color: var(--hover-btn) !important;
+    border: 2px solid var(--primary-btn);
+    font-weight: bold;
+  }
+}
+
+.event-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.event-card:active {
+  transform: scale(0.97);
+}
+
+/* 상단 */
+.event-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+/* 색 점 */
+.event-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* 날짜 */
+.event-date {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* 제목 */
+.event-card-title {
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+/* 시간 */
+.event-card-time {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+/* D-Day */
+.dday {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.mobile-search {
+  padding: 10px;
+}
+
+.mobile-search-input {
+  width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+  border: 1px solid #ddd;
+
+  font-size: 0.9rem;
+  outline: none;
+}
+
+/* 포커스 효과 */
+.mobile-search-input:focus {
+  border-color: var(--primary-btn);
+}
