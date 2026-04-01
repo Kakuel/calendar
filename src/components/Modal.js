@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 const Modal = ({ isOpen, onClose, onSave, onDelete, event, date, events }) => {
     // --- [상태 관리] ---
-    // (버그 수정: 초기값에 repeat: 'none' 을 반드시 명시)
     const [formData, setFormData] = useState({
         id: '', title: '', date: date || '', startTime: '10:00', endTime: '11:00',
         tag: '기본', color: '#b5ead7', memo: '',
@@ -10,10 +9,16 @@ const Modal = ({ isOpen, onClose, onSave, onDelete, event, date, events }) => {
         isDday: false
     });
 
+    // 사용자 설정 태그를 입력하는지 판별하는 함수
     const [isCustomTag, setIsCustomTag] = useState(false);
+
+    // 정말 삭제하시겠습니까? 표기
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // 삭제의 범위를 기억하는 코드
     const [deleteScope, setDeleteScope] = useState('single');
 
+    // 색상 팔레트
     const palette = ['#b5ead7', '#ffb7b2', '#ffdac1', '#e2f0cb', '#c7ceea', '#ffd1dc'];
 
     // 모달 열릴 때 기존 데이터 덮어씌우기
@@ -31,16 +36,17 @@ const Modal = ({ isOpen, onClose, onSave, onDelete, event, date, events }) => {
 
     // 일반 입력값 변경 핸들러
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const {name, value, type, checked} = e.target;
         if (name === 'tag' && value === 'custom') {
             setIsCustomTag(true);
             return;
         } else if (name === 'tag') {
             setIsCustomTag(false);
         }
-        setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+        setFormData({...formData, [name]: type === 'checkbox' ? checked : value});
     };
 
+    // 일정 중복 방지 로직
     const isOverlapping = (newEvent, events) => {
         return events.some(evt => {
             if (evt.date !== newEvent.date) return false;

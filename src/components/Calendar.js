@@ -69,6 +69,7 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
     };
 
     // Date 객체를 “한국 기준 날짜 문자열 (YYYY-MM-DD)”로 변환하는 함수
+    // 한국 기준으로 안하면 날짜에 간극이 생길 수 있었음.
     const formatLocalDate = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -128,22 +129,28 @@ const Calendar = ({ currentDate, setCurrentDate }) => {
         });
     }
 
+    // 달력 페이지 넘기는 함수
     const changeMonth = (offset) => {
         setAnimClass(offset > 0 ? "slide-next" : "slide-prev");
         setCurrentDate(new Date(year, month + offset, 1));
         setTimeout(() => setAnimClass(""), 300);
     };
 
+    // 현재 달의 일정 데이터만 보여주는 함수
+    // 마지막 구문은 검색어와 일치하는지까지 비교해 검색 시 해당 일정만 나오도록 만들어줌
     const currentMonthEvents = events.filter(evt => {
         const evtMonth = new Date(evt.date).getMonth();
         const evtYear = new Date(evt.date).getFullYear();
         return evtMonth === month && evtYear === year && evt.title.includes(searchQuery);
     });
 
+    // 태그 분류 및 합산해 사이드바에 표기하는 함수
     const tagCounts = currentMonthEvents.reduce((acc, evt) => {
         acc[evt.tag] = (acc[evt.tag] || 0) + 1;
         return acc;
     }, {});
+
+    // 이번 달 일정의 전체 수
     const totalTags = currentMonthEvents.length;
 
     // --- Calendar.js 내부 useEffect (알림 로직) ---
