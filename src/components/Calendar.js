@@ -26,16 +26,29 @@ const Calendar = () => {
     const handleTouchEnd = (e) => {
         if (!touchStart) return;
         const touchEnd = e.changedTouches[0].clientX;
-        if (touchStart - touchEnd > 70) { // 왼쪽으로 스와이프 (다음 달)
-            const next = new Date(currentDate);
-            next.setMonth(next.getMonth() + 1);
-            setCurrentDate(next);
+        const diff = touchStart - touchEnd;
+
+        if (diff > 70) {
+            // 왼쪽으로 스와이프 (다음 달)
+            changeMonth(1);
+        } else if (diff < -70) {
+            // 오른쪽으로 스와이프 (이전 달)
+            changeMonth(-1);
         }
-        if (touchStart - touchEnd < -70) { // 오른쪽으로 스와이프 (이전 달)
-            const prev = new Date(currentDate);
-            prev.setMonth(prev.setMonth() - 1);
-            setCurrentDate(prev);
-        }
+        setTouchStart(null);
+    };
+
+    // 달력 월 변경 함수(이전 달, 다음 달)에 애니메이션 상태를 추가합니다.
+    const handlePrevMonth = () => {
+        setAnimClass("slide-right");
+        setTimeout(() => setAnimClass(""), 300); // 0.3초 후 클래스 제거
+        // (기존의 월 감소 로직 실행)
+    };
+
+    const handleNextMonth = () => {
+        setAnimClass("slide-left");
+        setTimeout(() => setAnimClass(""), 300);
+        // (기존의 월 증가 로직 실행)
     };
 
     // --- [날짜 클릭 시] ---
@@ -128,7 +141,6 @@ const Calendar = () => {
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingEvent(null);
-        setSelectedDate(null);
     };
 
     // --- [드래그 앤 드롭] ---
@@ -248,6 +260,7 @@ const Calendar = () => {
                                                 }}
                                             >
                                                 <div className="event-item-content">
+                                                    {evt.startTime && <span className="event-bar-time" style={{ marginRight: '4px', fontSize: '11px', opacity: 0.8 }}>{evt.startTime}</span>}
                                                     <span className="event-title">{evt.title}</span>
                                                     {evt.isDday && (
                                                         <span className="dday">{getDDay(evt.date)}</span>
@@ -359,6 +372,28 @@ const Calendar = () => {
                                 </div>
                             ))}
                         </div>
+                    )}
+                </div>
+                <div className="sidebar-section">
+                    <h3>📝 {selectedDate && selectedDate.substring(5)} 일정 목록</h3>
+                    {dailyEvents.length === 0 ? (
+                        <p className="empty-text" style={{ fontSize: '13px', color: '#888' }}>해당 날짜에 일정이 없습니다.</p>
+                    ) : (
+                        <ul className="sidebar-event-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                            {dailyEvents.map(evt => (
+                                <li key={evt.id} style={{ display: 'flex', flexDirection: 'column', padding: '8px 0', borderBottom: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: evt.color || `var(--tag-${evt.tag}, var(--tag-기본))` }}></span>
+                                        <span style={{ fontWeight: 'bold', fontSize: '13px' }}>{evt.title}</span>
+                                    </div>
+                                    {(evt.startTime || evt.endTime) && (
+                                        <span style={{ fontSize: '12px', color: '#666', marginLeft: '18px' }}>
+                                            🕒 {evt.startTime} ~ {evt.endTime}
+                                        </span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
                     )}
                 </div>
             </aside>
