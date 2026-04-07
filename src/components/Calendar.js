@@ -226,11 +226,11 @@ const Calendar = () => {
                                                 ${isToday ? 'today-cell' : ''} 
                                                 ${selectedDate === dayObj.dateStr ? 'selected' : ''}
                                         `}
-                                    onClick={() => {
-                                        setSelectedDate(dayObj.dateStr);
-
+                                    onClick={() => setSelectedDate(dayObj.dateStr)}
+                                    onDoubleClick={() => {
                                         if (!isMobile) {
-                                            setIsModalOpen(true);  // PC만 모달 열림
+                                            setSelectedDate(dayObj.dateStr);
+                                            setIsModalOpen(true);
                                         }
                                     }}
                                     onDragOver={onDragOver}
@@ -251,20 +251,21 @@ const Calendar = () => {
                                                 draggable
                                                 onDragStart={(e) => onDragStart(e, evt.id)}
                                                 className="event-item"
-                                                /* 수정된 부분: 배경색 로직 교체 */
                                                 style={{backgroundColor: evt.color || `var(--tag-${evt.tag}, var(--tag-기본))`}}
                                                 onClick={(e) => {
-                                                    e.stopPropagation();
+                                                    e.stopPropagation(); // 셀의 클릭 이벤트 전파 방지
                                                     setEditingEvent(evt);
                                                     setIsModalOpen(true);
                                                 }}
                                             >
                                                 <div className="event-item-content">
-                                                    {evt.startTime && <span className="event-bar-time" style={{ marginRight: '4px', fontSize: '11px', opacity: 0.8 }}>{evt.startTime}</span>}
-                                                    <span className="event-title">{evt.title}</span>
-                                                    {evt.isDday && (
-                                                        <span className="dday">{getDDay(evt.date)}</span>
+                                                    {/* 3. 시작 및 종료 시간 모두 표시 */}
+                                                    {evt.startTime && (
+                                                        <span className="event-bar-time">
+                                                            {evt.startTime}~{evt.endTime}
+                                                        </span>
                                                     )}
+                                                    <span className="event-title">{evt.title}</span>
                                                 </div>
                                             </div>
                                         ))}
