@@ -86,11 +86,8 @@ const Modal = ({ isOpen, onClose, onSave, onDelete, event, date, events }) => {
         onSave(finalData);
     };
 
-    // 최종 삭제 핸들러 (브라우저 확인창)
     const handleFinalDelete = () => {
-        if (window.confirm("정말 이 일정을 삭제하시겠습니까? (이 작업은 되돌릴 수 없습니다.)")) {
-            onDelete(formData, deleteScope);
-        }
+        onDelete(formData, deleteScope);
     };
 
     // --- [친절한 시간 드롭다운을 위한 헬퍼 함수] ---
@@ -341,4 +338,4 @@ const Modal = ({ isOpen, onClose, onSave, onDelete, event, date, events }) => {
     );
 };
 
-export default Modal;
+export default React.memo(Modal);

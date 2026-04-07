@@ -150,8 +150,8 @@ button:hover { background-color: var(--hover-btn); }
 .tag-label { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #333; }
 
 /* --- 모달 애니메이션 및 구조 --- */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.25); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); animation: fadeIn 0.25s ease-out; z-index: 1000; }
-.modal-content { background: var(--panel-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border-color); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.25); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); animation: fadeIn 0.25s ease-out; z-index: 1000; will-change: opacity;}
+.modal-content { background: var(--panel-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border-color); will-change: transform, opacity; transform: translateZ(0);}
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

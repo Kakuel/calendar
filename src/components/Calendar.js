@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo }from 'react';
 import Modal from './Modal';
 import { useApp } from './AppContext';
 
@@ -20,6 +20,15 @@ const Calendar = () => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const filteredEvents = useMemo(() => {
+        if (!searchQuery.trim()) return [];
+        // 선택된 날짜가 아닌, 전체 'events' 배열에서 검색
+        return events.filter(evt =>
+            evt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (evt.memo && evt.memo.toLowerCase().includes(searchQuery.toLowerCase()))
+        ).sort((a, b) => new Date(a.date) - new Date(b.date)); // 날짜순 정렬
+    }, [events, searchQuery]);
 
     // --- [스와이프 로직] ---
     const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
@@ -138,10 +147,10 @@ const Calendar = () => {
         closeModal();
     };
 
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         setIsModalOpen(false);
         setEditingEvent(null);
-    };
+    }, []); // 메모리 주소를 고정하여 불필요한 리렌더링 방지
 
     // --- [드래그 앤 드롭] ---
     const onDragStart = (e, eventId) => e.dataTransfer.setData("eventId", eventId);
@@ -259,7 +268,7 @@ const Calendar = () => {
                                                 }}
                                             >
                                                 <div className="event-item-content">
-                                                    {/* 3. 시작 및 종료 시간 모두 표시 */}
+                                                    {/* 시작 및 종료 시간 모두 표시 */}
                                                     {evt.startTime && (
                                                         <span className="event-bar-time">
                                                             {evt.startTime}~{evt.endTime}
@@ -275,20 +284,53 @@ const Calendar = () => {
                         })}
                     </div>
                 </div>
+
+                {/* --- [모바일 검색 영역 & 전체 일정 검색 결과 노출] --- */}
                 <div className="mobile-search mobile-only-section">
                     <input
                         type="text"
-                        placeholder="일정 검색..."
+                        placeholder="전체 일정 검색..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="mobile-search-input"
                     />
+
+                    {/* 검색어가 입력되었을 때만 결과 목록 표시 */}
+                    {searchQuery && (
+                        <div className="mobile-search-results" style={{
+                            marginTop: '8px',
+                            maxHeight: '250px',
+                            overflowY: 'auto',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '8px',
+                            backgroundColor: 'var(--panel-bg)',
+                            zIndex: 10,
+                            textAlign: 'left'
+                        }}>
+                            {filteredEvents.length > 0 ? (
+                                filteredEvents.map(evt => (
+                                    <div key={evt.id}
+                                         onClick={() => {
+                                             setSelectedDate(evt.date); // 클릭 시 해당 날짜로 이동
+                                             setEditingEvent(evt);
+                                             setIsModalOpen(true);
+                                         }}
+                                         style={{ padding: '12px', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+                                        <div style={{ fontSize: '11px', color: '#888' }}>{evt.date}</div>
+                                        <div style={{ fontWeight: 'bold' }}>{evt.title}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>검색 결과가 없습니다.</div>
+                            )}
+                        </div>
+                    )}
                 </div>
+
                 {/* --- [모바일 전용 하단 UI 복구] --- */}
                 <div className="mobile-event-section mobile-only-section">
                     <div className="section-header">
                         <h3>📅 {selectedDate} 일정</h3>
-                        {/* 2번 요구사항: 일정 생성 버튼 추가 */}
                         <button className="add-event-fab" onClick={() => setIsModalOpen(true)}>+</button>
                     </div>
 
@@ -336,6 +378,7 @@ const Calendar = () => {
                         )}
                     </div>
                 </div>
+            </div>
 
                 {isModalOpen && (
                     <Modal
@@ -348,17 +391,46 @@ const Calendar = () => {
                         events={events}
                     />
                 )}
-            </div>
 
             <aside className="calendar-sidebar">
                 <div className="sidebar-section">
                     <h3>🔍 일정 검색</h3>
                     <input
-                        type="text" placeholder="검색어를 입력하세요"
-                        value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                        type="text"
+                        placeholder="검색어를 입력하세요"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="search-input"
                     />
                 </div>
+
+                {isMobile && searchQuery && (
+                    <div className="mobile-search-results" style={{
+                        marginTop: '10px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        background: 'var(--panel-bg)',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)'
+                    }}>
+                        {filteredEvents.length > 0 ? (
+                            filteredEvents.map(evt => (
+                                <div key={evt.id}
+                                     onClick={() => {
+                                         setSelectedDate(evt.date);
+                                         setEditingEvent(evt);
+                                         setIsModalOpen(true);
+                                     }}
+                                     style={{ padding: '10px', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+                                    <div style={{ fontSize: '12px', color: '#888' }}>{evt.date}</div>
+                                    <div style={{ fontWeight: 'bold' }}>{evt.title}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ padding: '10px', color: '#aaa', fontSize: '13px' }}>검색 결과가 없습니다.</div>
+                        )}
+                    </div>
+                )}
 
                 <div className="sidebar-section">
                     <h3>📊 {month + 1}월 태그 분포</h3>
